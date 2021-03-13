@@ -30,6 +30,36 @@ module.exports = class UserController {
         }
     }
 
+    async updateUser(req, res) {
+        try {
+            const { name, email } = req.body;
+            const user = await User.findOneAndUpdate({ email: email }, { name: name });
+
+            if(!user) {
+                return res.send({ message: 'User not found.' });
+            }
+
+            return res.send({ message: 'Success' });
+        } catch(e) {
+            res.send({ error: e.message });
+        }
+    }
+
+    async deleteUser(req, res) {
+        try {
+            const { email } = req.body;
+            const user = await User.findOneAndDelete({ email: email }).select('-_id -__v -password');
+
+            if(!user) {
+                return res.send({ message: 'User not found.' });
+            }
+
+            return res.send({ message: user });
+        } catch(e) {
+            res.send({ error: e.message });
+        }
+    }
+
     async listAllUsers(req, res) {
         try {
             const users = await User.find().select('-_id -__v -password');
