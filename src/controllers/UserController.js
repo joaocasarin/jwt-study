@@ -1,6 +1,6 @@
-const sha256 = require('sha256');
 const jwt = require('jsonwebtoken');
 const User = require('../models/UserSchema');
+const sha256 = require('sha256');
 
 const generateJwt = (params = {}) => {
     return jwt.sign(params, process.env.SECRET, { expiresIn: '1h'});
@@ -10,19 +10,13 @@ module.exports = class UserController {
 
     async createUser(req, res) {
         try {
-            const { name, email, password } = req.body;
+            const { name, email } = req.body;
 
             if (await User.findOne({ email: email })) {
                 return res.status(400).send({ message: 'User already exists.' });
             }
 
-            const userObject = {
-                name: name,
-                email: email,
-                password: sha256(`${sha256(password)}${sha256(process.env.SALT)}`)
-            };
-
-            await User.create(userObject);
+            await User.create(req.body);
 
             return res.status(201).send({ message: 'Success', token: generateJwt({ name: name, email: email }) });
         } catch(e) {
